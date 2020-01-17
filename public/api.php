@@ -13,15 +13,36 @@ $app->get(
     return $response;
   }
 );
+
+class MyDB extends SQLite3 {
+    function __construct() {
+        $this->open('customers.db');
+    }
+}
+$db = new MyDB();
+if(!$db) {
+    echo $db->lastErrorMsg();
+    exit();
+}
+$sql = "SELECT id, name, surname FROM customer";
+$ret = $db->query($sql);
+while($row = $ret->fetchArray(SQLITE3_ASSOC) ) {
+    echo "id = ". $row['id'] . ", ";
+    echo "name = ". $row['name'] . ", ";
+    echo "surname = ". $row['surname'] ."<br>";
+}
+
+$add = "INSERT INTO customer (name, surname)
+	VALUES('Bogusław', 'Krzak')";
+$add1 = $db->query($add);
+$db ->close();
+
 $app->get(
     '/api/participants',
-    function (Request $request, Response $response, array $args) {
-        $participants = [
-           ['id' => 1, 'firstname' => 'John', 'lastname' => 'Doe'],
-           ['id' => 2, 'firstname' => 'Kate', 'lastname' => 'Pig'],
-           ['id' => 3, 'firstname' => 'Chris', 'lastname' => 'Lua'],
-        ];
-        return $response->withJson($participants);
+    function (Request $request, Response $response, array $args) use($db) {
+        $array = [];
+        $array[] = 'element';
+        return $response->withJson($array);
     }
 );
 $app->run();
